@@ -23,3 +23,8 @@ $wgVirtualRestConfig['modules']['parsoid'] = array(
     // Parsoid "prefix", see below (optional)
     'prefix' => 'localhost'
 );
+
+wfLoadExtension( 'SyntaxHighlight_GeSHi' );
+$wgVisualEditorPluginModules = array(
+    'syntaxhighlight'
+);
