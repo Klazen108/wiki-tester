@@ -3,6 +3,8 @@ Mediawiki Test Driver
 
 # Quickstart
 
+To get started with a demo of VisualEditor:
+
 1) Run `docker build -t wikitest .` to build the image
 2) Run `docker run --rm --name wikitest -p 80:80 wikitest` to start the container (rm means delete when done)
 3) Give everything about 15 seconds to boot up
@@ -14,6 +16,8 @@ By default, the wiki is configured to run on `localhost:80`. Changing this isn't
 ```
 docker run --rm --name wikitest -p 85:80 -e MW_PORT=85 wikitest
 ```
+
+You can follow the same process in the subfolders (e.g. tinymce, wysiwyg) to try out the other extensions.
 
 # VisualEditor 
 

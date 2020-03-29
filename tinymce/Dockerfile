@@ -1,4 +1,10 @@
-FROM mediawiki:1.27
+FROM alpine/git AS gitter
+# go get the extension and pull in submodules
+
+RUN cd /; \
+git clone https://gerrit.wikimedia.org/r/mediawiki/extensions/TinyMCE.git;
+
+FROM mediawiki:1.34
 
 # MEDIAWIKI SETUP: run the install script, make sqlitedb accessible by apache, 
 # allow server host/port to be defined by environment vars
@@ -16,17 +22,9 @@ php maintenance/update.php --quick; \
 chmod -R 777 /var/www/data; \
 sed -i 's/^$wgServer.*$/$wgServer=\$_ENV["MW_HOST"].":".\$_ENV["MW_PORT"];/' LocalSettings.php
 
-#grab wysiwyg extension, extract and link into extensions directory
-RUN curl -L -s https://github.com/Mediawiki-wysiwyg/WYSIWYG-CKeditor/archive/wysiwyg_mw130_462.tar.gz --output wysiwyg_mw130_462.tar.gz; \
-mkdir -p extensions/WYSIWYG-src; \
-tar xzf wysiwyg_mw130_462.tar.gz --strip-components 1 -C extensions/WYSIWYG-src; \
-rm wysiwyg_mw130_462.tar.gz; \
-cd extensions/; \
-ln -s WYSIWYG-src/WYSIWYG WYSIWYG; \
-ln -s WYSIWYG-src/SemanticForms SemanticForms; \
-mv WikiEditor WikiEditor-org; \
-ln -s WYSIWYG-src/WikiEditor WikiEditor;
-
+# VISUALEDITOR SETUP: copy the extension binaries over
+COPY --from=gitter /TinyMCE extensions/TinyMCE
+# copy the settings needed for VisualEditor into the LocalSettings file
 COPY SettingsExtension.php .
 RUN cat SettingsExtension.php >> LocalSettings.php
 
@@ -41,4 +39,4 @@ ENV MW_HOST=localhost \
     MW_PORT=80
 
 # start parsoid and mediawiki
-CMD /run-parsoid.sh & apache2-foreground
+CMD apache2-foreground
